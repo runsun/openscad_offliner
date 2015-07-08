@@ -40,6 +40,8 @@ Note:
 	5) Search box is hidden. There might be a way (i.e., javascript) to 
 		search the doc but we leave that to the future.
 
+git: https://github.com/runsun/openscad_offliner
+
 '''
 
 import urllib, urllib2, os, time
@@ -58,13 +60,16 @@ url_site= 'https://en.wikibooks.org'
 url = 'https://en.wikibooks.org/wiki/OpenSCAD_User_Manual'
 url_wiki = 'https://en.wikibooks.org'
 url_opscad = '/wiki/OpenSCAD_User_Manual'
-
+url_offliner= 'https://github.com/runsun/openscad_offliner'
 
 footer = bs(
 '''<hr width=1 /><div style="font-size:14px;color:darkgray;text-align:center">
-Downloaded from <a href="%s">here</a> with <b style="color:blue">%s</b> 
-on ( <u style="color:blue">%s</u> )
-</div><br/><br/><br/>'''%( url, __file__, (time.strftime("%Y/%m/%d %H:%M")) )
+Downloaded from <a href="%s">here</a> with <a href="%s">
+<b style="color:blue">%s</b></a> on ( <u style="color:blue">%s</u> )
+</div><br/><br/><br/>'''%( url
+						 , url_offliner
+						 , __file__.split(".")[0]
+						 , (time.strftime("%Y/%m/%d %H:%M")) )
 )
 
 if not os.path.exists(dir_docs): os.makedirs(dir_docs)
