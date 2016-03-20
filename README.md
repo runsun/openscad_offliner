@@ -3,6 +3,10 @@ Download OpenSCAD online documentation for offline reading.
 
 Require: python 2.7, BeautifulSoupt 4.0 above
 
+Updated on 2016, March 20th:
+
+  * Major fix for bug believed to be a cross-platform issue. The original version, which is developed in Linux, is saved as openscad_offliner_2015.py. It is made to work in Windows in the current version.
+  
 Usage:
 
 		1) Save this file in folder x.

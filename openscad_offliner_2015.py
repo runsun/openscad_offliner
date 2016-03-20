@@ -48,8 +48,25 @@ git: https://github.com/runsun/openscad_offliner
 ## Developer Note: handle_page() is the main function
 ##
 
-import urllib, urllib2, os, time, sys
+import urllib, urllib2, os, time
 from bs4 import BeautifulSoup as bs
+
+##
+## Set folders:
+##
+dir_docs = 'openscad_docs'                       
+dir_imgs =  os.path.join( dir_docs, 'imgs')  
+dir_styles =  'styles'   
+dir_styles_full = os.path.join( dir_docs, 'styles')  
+
+if not os.path.exists(dir_docs): os.makedirs(dir_docs)
+if not os.path.exists(dir_imgs): os.makedirs(dir_imgs)
+if not os.path.exists(dir_styles_full): os.makedirs(dir_styles_full)
+print "dir_docs= " + dir_docs
+print "dir_imgs= " + dir_imgs
+print "dir_styles= " + dir_styles
+print "dir_styles_full= " +dir_styles_full
+
 
 ##
 ## Data url
@@ -58,33 +75,6 @@ url = 'https://en.wikibooks.org/wiki/OpenSCAD_User_Manual'
 url_wiki = 'https://en.wikibooks.org'
 url_openscadwiki = '/wiki/OpenSCAD_User_Manual'
 url_offliner= 'https://github.com/runsun/openscad_offliner'
-
-print "[Remote]"
-print "url= ", url
-print "url_wiki= ", url_wiki
-print "url_openscadwiki= ", url_openscadwiki
-print "url_offliner= ", url_offliner
-
-
-##
-## Set folders:
-##
-
-this_dir = os.path.dirname(os.path.abspath(__file__))
-dir_docs = 'openscad_docs'                       
-dir_imgs =  os.path.join( dir_docs, 'imgs')  
-dir_styles =  'styles'   
-dir_styles_full = os.path.join( dir_docs, 'styles') 
-
-if not os.path.exists(dir_docs): os.makedirs(dir_docs)
-if not os.path.exists(dir_imgs): os.makedirs(dir_imgs)
-if not os.path.exists(dir_styles_full): os.makedirs(dir_styles_full)
-print "\n[Local]"
-print "this_dir= " + this_dir
-print "dir_docs= " + dir_docs
-print "dir_imgs= " + dir_imgs
-print "dir_styles= " + dir_styles
-print "dir_styles_full= " +dir_styles_full
 
 
 ##
@@ -95,16 +85,7 @@ imgs = [] # Local paths of downloaded images
 styles=[] # stylesheet urls
 
 
-def sureUrl(url):
-  ''' Return proper url that is complete and cross-platform '''
-  if url.startswith('//'):
-  		url = 'https:' + url
-  elif not url.startswith( url_wiki ):
-    #print ind + ':: url not starts with url_wiki("%s"), changing it...'%url_wiki
-    url = urllib2.urlparse.urljoin( url_wiki, url[0]=="/" and url[1:] or url)    
-  
-  return url 
-  
+
 ##========================================================
 ##
 ##   styles
@@ -142,12 +123,7 @@ def handle_styles( soup, ind ):
 
 	for link in soup.find_all('link'):
 
-		#href = link.get('href')
-		href = sureUrl( link.get('href') )
-    
-		#if not href.startswith( url_wiki ):
-		#  href = os.path.join( url_wiki, href)
-    
+		href = link.get('href')
 		if '/load.php?' in href:
 			download_style_from_link_tag( soup_link=link, ind=ind )
 		else:
@@ -161,13 +137,12 @@ def download_style_from_link_tag( soup_link, ind ):
 
 	link = soup_link
 	ind = ind +"# " 
-	href = sureUrl( link['href'] )
+	href = link['href']
 	print ind+ "stylesheet link found"
 	print ind+ "href = "+ href
 	if href:
-  
-		#if href.startswith('//'):
-		#	href = 'https:' + href
+		if href.startswith('//'):
+			href = 'https:' + href
 
 		(stylename,redirect_path) = download_style( url=href, ind=ind )
 
@@ -219,14 +194,6 @@ def download_style( url, ind ):
 		Download style and update styles buffer. Return (style filename, redirect_path)
 	'''
 
-	print ind + ':: Entering download_style( url = "%s ...")'%url[:20]
-  
-  #	if not url.startswith( url_wiki ):
-  #	  print ind + ':: url not starts with url_wiki("%s"), changing it...'%url_wiki
-  #	  url = urllib2.urlparse.urljoin( url_wiki, url[0]=="/" and url[1:] or url)
-  #	  print ind + ':: New url = '+ url[:20] + '...'
-	url = sureUrl( url )  
-      
 	print ind+ ":: download_style( " + url + " )"	
 
 	if url in styles:
@@ -300,9 +267,6 @@ def handle_scripts( soup, ind ):
 		All scripts are shutdown and deleted if possible
 	'''
 
-	print ind+ '-'*40
-	print ind + '>>> handle_scripts(soup)'
-  
 	for s in soup.findAll("script"):
 
 		print ind + "Clearing script: " + str(s)
@@ -323,7 +287,6 @@ def handle_scripts( soup, ind ):
 
 def handle_tagAs( soup, ind ):
 
-	print ind+ '>>> handle_tagAs(soup)'
 	for a in soup.find_all('a'):
 		href= a.get('href')
 		'''
@@ -347,19 +310,18 @@ def handle_tagAs( soup, ind ):
 				
 				if not fname=='Print_version.html':
 
+					print ind+ ':'*40
+					print ind+ 'Page: ' + href
 					handle_page(url=href, indent=len(ind)+2)
 					a['href']= fnamebranch
 					print ind+ "Saved page as = ", os.path.join(dir_docs, fname)
 					print ind+ "New href = ", a.get('href')
 					print ind+ "Total pages= ", len(pages) 
-			
-			else:
-			  a['href']= sureUrl(href)
-      
-#      elif href.startswith('/wiki'):
-#				a['href']= url_wiki + href
-#			elif href.startswith('//'):
-#				a['href']= 'https:' + href
+
+			elif href.startswith('/wiki'):
+				a['href']= url_wiki + href
+			elif href.startswith('//'):
+				a['href']= 'https:' + href
 
 			if a.img and not a.img['src'].startswith( '/static/images' ):
 			
@@ -383,13 +345,9 @@ def download_img( soup_a, ind ):
 		ind   : indent for logging
 	'''
 	
-	print ind+ '-'*40
-	print ind+ '>>> download_img(soup_a)'
-	src = sureUrl( soup_a.img['src'] )
-#	if src.startswith('//'):
-#	   src = "https:" + src
-#	elif not src.startswith( url_wiki):
-#	  src = urllib2.urlparse.urljoin( url_wiki, src)
+	src = soup_a.img['src']
+	if src.startswith('//'):
+	   src = "https:" + src
 
 	imgname = src.split("/")[-1]
 
@@ -397,6 +355,7 @@ def download_img( soup_a, ind ):
 	#  Some img name contains %28,%29 for "(",")", resp, and %25 for %.
 	imgname = imgname.replace('%28','(').replace('%29',')').replace('%25','%')
 
+	print ind+ '-'*40
 	print ind+ "Img src: " + src
 
 	savepath = os.path.join( dir_imgs, imgname)  # local img path
@@ -501,24 +460,18 @@ def removeNonOpenSCAD( soup ):
 
 def handle_page( url=url,folder=dir_docs, indent=0 ):	
 
-
 	# For logging	
 	ind = ' '*indent+'['+str(len(pages)+1)+'] '
 	indm = ind +"| " # for image
-
-	print ind+ ':'*40
-	print ind+ '>>> handle_page(url="%s", folder="%s")'%(url, folder)
-	#print ind+ 'Page: ' + href
-					
 	
-#	if not url.startswith( url_wiki):
-#		url = url_wiki + url 
-	url = sureUrl( url )  
+	if not url.startswith( url_wiki):
+		url = url_wiki + url 
 	
 	if url not in pages:
 
+		print 
 		print ind+'===================================='
-		print ind+'This page not yet loaded, load to Page # ', len(pages)+1
+		print ind+'Page # ', len(pages)+1
 		print ind+'Downloading:', url #.split('/')[-1]
 
 		response = urllib2.urlopen(url)
@@ -575,8 +528,6 @@ __history__={
 	)
 ,"20150714":
 	( "Major restructuring into smaller pieces", "Able to load @import styles")
-,"20160320":
-	( "Major fix for bug believed to be a cross-platform issue. The original version, which is developed in Linux, is saved as openscad_offliner_2015.py. It is made to work in Windows in the current version.")
 }
 
 
