@@ -6,6 +6,7 @@ Require: python 2.7, BeautifulSoupt 4.0 above
 Updated on 2016, March 20th:
 
   * Major fix for bug believed to be a cross-platform issue. The original version, which is developed in Linux, is saved as openscad_offliner_2015.py. It is made to work in Windows in the current version.
+  * Include openscad_docs.zip. Users don't need to run the python script, unless a most recent copy is needed.
   
 Usage:
 
