@@ -352,14 +352,12 @@ def handle_tagAs( soup, ind ):
 					print ind+ "Saved page as = ", os.path.join(dir_docs, fname)
 					print ind+ "New href = ", a.get('href')
 					print ind+ "Total pages= ", len(pages) 
-			
-			else:
-			  a['href']= sureUrl(href)
+
       
-#      elif href.startswith('/wiki'):
-#				a['href']= url_wiki + href
-#			elif href.startswith('//'):
-#				a['href']= 'https:' + href
+			elif href.startswith('/wiki'):
+				a['href']= url_wiki + href
+			elif href.startswith('//'):
+				a['href']= 'https:' + href
 
 			if a.img and not a.img['src'].startswith( '/static/images' ):
 			
@@ -515,7 +513,7 @@ def handle_page( url=url,folder=dir_docs, indent=0 ):
 #		url = url_wiki + url 
 	url = sureUrl( url )  
 	
-	if url not in pages:
+	if url not in pages: # url not already downloaded
 
 		print ind+'===================================='
 		print ind+'This page not yet loaded, load to Page # ', len(pages)+1
